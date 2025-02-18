@@ -129,15 +129,7 @@ class PGL_SUM(nn.Module):
         y_ff2 = self.linear_layer(y_ff)
         y_add = y_ff2 + y_norm
         y = self.norm_y(y_add)
-
-        # y = weighted_value + residual # 1st method
-        # y = torch.matmul(attn_weights, weighted_value) # 2nd method
-        # a = 1 - attn_weights  # 3rd method
-        # d = torch.prod(a, 1)  # 3rd method
-        # d = torch.unsqueeze(d, dim=1)  # 3rd method
-        # y = torch.mul(d, y)  # 3rd method, alternative: y = torch.mul(d, weighted_value)
         video_embedding, new_attn_weights = self.second_attention(y, y)
-        # attentive_ft, w = self.second_attention_reconstr(shot_features, shot_features)
         new_attn_weights = torch.unsqueeze(new_attn_weights, dim=0)
         video_embedding_norm = self.norm_y(video_embedding)
         video_embedding_ff = self.linear_layer(video_embedding_norm)
@@ -147,23 +139,8 @@ class PGL_SUM(nn.Module):
         video_embedding_add = video_embedding_ff2 + video_embedding_norm
         video_embedding = self.norm_y(video_embedding_add)
 
-        # y = self.linear_1(new_weighted_value)
         y_new = torch.mul(new_attn_weights.t(), y)
-        '''
-        y = self.drop(y)
-        y = self.norm_y(y)
-        '''
-        # 2-layer NN (Regressor Network)
-        '''
-        y_new = self.linear_1(y_new)
-        y_new = self.relu(y_new)
-        y_new = self.drop(y_new)
-        y_new = self.norm_linear(y_new)
-
-        y_new = self.linear_2(y_new)
-        y_new = self.sigmoid(y_new)
-        y_new = y_new.view(1, -1)
-        '''
+        
         return video_embedding, new_attn_weights  # y_new  # new_attn_weights # , attentive_ft
 
 
