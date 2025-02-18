@@ -4,7 +4,7 @@ import torch
 from pathlib import Path
 import pprint
 
-save_dir = Path('/home/gevge/Downloads/Highlight_detection/Summaries/exp4')
+save_dir = Path('...') # define the directory where the results will be saved to
 
 
 def str2bool(v):
