@@ -124,76 +124,21 @@ class Solver(object):
                     frame_features = next(iterator)
 
                     frame_features = frame_features.to(self.config.device)
-                    # frame_features_cap = frame_features_cap.to(self.config.device)
-                    # target = target.to(self.config.device)
-
-                    '''
-                    for k in range(2):
-                        output, weights = self.model(frame_features.squeeze(0), frame_features_cap.squeeze(0))
-                        h.append(output)
-                        
-                    '''
+                  
                     output, weights = self.model(frame_features.squeeze(0))
                     h1.append(output)
                     output, weights = self.model(frame_features.squeeze(0))
                     h2.append(output)
-                    '''
-                    output_1, weights_1 = self.model(frame_features.squeeze(0), frame_features_cap.squeeze(0))
-                    h.append(output_1)
-                    output_2, weights_2 = self.model(frame_features.squeeze(0), frame_features_cap.squeeze(0))
-                    h.append(output_2)
-                    output_3, weights_3 = self.model(frame_features.squeeze(0), frame_features_cap.squeeze(0))
-                    h.append(output_3)
-                    output_4, weights_4 = self.model(frame_features.squeeze(0), frame_features_cap.squeeze(0))
-                    h.append(output_4)
-                    '''
-                # h_4 = torch.stack(h, dim=0).squeeze(1)  #.detach().cpu().numpy()
 
                 h1 = torch.stack(h1, dim=0).squeeze(1)
                 h2 = torch.stack(h2, dim=0).squeeze(1)
 
-
-                '''
-                    cos_sim_matrix = self.cos_sim(h.unsqueeze(1), h.unsqueeze(0)).detach().cpu().numpy()
-                    np.fill_diagonal(cos_sim_matrix, 0)
-                    mean_similarity = cos_sim_matrix.sum() / 12
-                    mean_similarity_list.append(mean_similarity)
-                '''
-
-                # cos_sim_matrix = self.cos_sim(h_4.unsqueeze(1), h_4.unsqueeze(0)).unsqueeze(0)  #.detach().cpu().numpy()
-
-                cos_sim_matrix = self.cos_sim(h1.unsqueeze(1), h2.unsqueeze(0)).unsqueeze(0)  #.detach().cpu().numpy()
-
-                # np.fill_diagonal(cos_sim_matrix, 0)
-                # M, N = cos_sim_matrix.shape
-                # K = 4
-                # L = 4
-                # MK = M // K
-                # NL = N // L
-                # cos_sim_matrix_avg = cos_sim_matrix[:MK*K, :NL*L].reshape(MK, K, NL, L).mean(axis=(1, 3))
-                # cos_sim_matrix_avg = torch.Tensor(cos_sim_matrix_avg).to('cuda')
-                # cos_sim_matrix_avg.requires_grad = True
-                '''
-                avg_pooling = nn.AvgPool2d(2)
-                cos_sim_matrix_avg = avg_pooling(cos_sim_matrix).squeeze(0)
-                '''
-                labels = torch.arange(cos_sim_matrix.size(1)).long().to("cuda")   # cos_sim_matrix_avg.size(0)
+                cos_sim_matrix = self.cos_sim(h1.unsqueeze(1), h2.unsqueeze(0)).unsqueeze(0)
+                
+                labels = torch.arange(cos_sim_matrix.size(1)).long().to("cuda")
                 cos_sim_matrix = cos_sim_matrix.squeeze(0)
-                '''
-                for i in trange(self.config.batch_size, desc='Video', ncols=80, leave=False):
-                    pos_pair = torch.exp(cos_sim_matrix_avg[i, i]).to(self.config.device)
-                    neg_pairs = 0
-                    for j in range(self.config.batch_size):
-                        if i != j:
-                            neg_pair = torch.exp(cos_sim_matrix_avg[i, j]).to(self.config.device)
-                            neg_pairs = neg_pairs + neg_pair
+                loss = self.loss_fct(cos_sim_matrix, labels)
 
-                    loss = -1 * torch.log(pos_pair / neg_pairs).to(self.config.device)
-                    '''
-                loss = self.loss_fct(cos_sim_matrix, labels)   # cos_sim_matrix_avg
-
-                # for i in range(self.config.batch_size):
-                    # loss = losses[i]
                 if self.config.verbose:
                     tqdm.write(f'[{epoch_i}] loss: {loss.item()}')
                 loss.backward()
@@ -238,11 +183,9 @@ class Solver(object):
         for frame_features, video_name in tqdm(self.test_loader, desc='Evaluate', ncols=80, leave=False):
             # [seq_len, input_size]
             frame_features = frame_features.view(-1, self.config.input_size).to(self.config.device)
-            # frame_features_cap = frame_features_cap.to(self.config.device)
 
             with torch.no_grad():
                 video_embedding, attn_weights = self.model(frame_features)  # [1, seq_len]
-                # scores = scores.squeeze(0).cpu().numpy().tolist()
                 attn_weights = attn_weights.cpu().numpy().tolist()
 
                 out_scores_dict[video_name] = attn_weights
