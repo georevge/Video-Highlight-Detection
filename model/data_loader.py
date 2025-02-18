@@ -16,13 +16,13 @@ class VideoData(Dataset):
         """
         self.mode = mode
         self.name = video_type.lower()
-        self.datasets = ['/home/gevge/Downloads/Highlight_detection/data/SumMe/vivit_summe_all.h5',
-                         '/home/gevge/Downloads/Highlight_detection/data/TVSum/vivit_tvsum_highlight_best2.h5',
-                         '/home/gevge/Downloads/Highlight_detection/data/SumMe/eccv16_dataset_summe_google_pool5.h5',
-                         '/home/gevge/Downloads/Highlight_detection/data/TVSum/eccv16_dataset_tvsum_google_pool5.h5']
-        self.datasets_cap = ['/home/gevge/Downloads/Highlight_detection/data/SumMe/summe_cap_roberta_amt.h5',
-                             '/home/gevge/Downloads/Highlight_detection/data/TVSum/tvsum_cap_roberta_amt.h5']
-        self.splits_filename = ['/home/gevge/Downloads/Highlight_detection/data/splits/' + self.name + '_splits.json']
+        self.datasets = ['.../SumMe/vivit_summe_all.h5',
+                         '.../TVSum/vivit_tvsum_highlight_best2.h5',
+                         '.../data/SumMe/eccv16_dataset_summe_google_pool5.h5',
+                         '.../TVSum/eccv16_dataset_tvsum_google_pool5.h5']
+        self.datasets_cap = ['.../data/SumMe/summe_cap_roberta_amt.h5',
+                             '.../data/TVSum/tvsum_cap_roberta_amt.h5']
+        self.splits_filename = ['.../data/splits/' + self.name + '_splits.json']
         self.split_index = split_index  # it represents the current split (varies from 0 to 4)
 
         if 'summe' in self.splits_filename[0]:
@@ -55,41 +55,8 @@ class VideoData(Dataset):
                 video_level_ft_list.append(clip_feature)
             video_level_ft = torch.stack(video_level_ft_list, dim=0)
             video_level_ft = torch.squeeze(video_level_ft)
-            '''
-            frame_features_cap = torch.Tensor(np.array(hdf_cap[video_name + '/features']))
-
-            gtscore = np.array(hdf_gt[video_name + '/gtscore'])
-
-            change_points = np.array(hdf_gt[video_name + '/change_points'])
-            n_frame_per_seg = np.array(hdf_gt[video_name + '/n_frame_per_seg'])
-            picks = np.array(hdf_gt[video_name + '/picks'])
-
-            video_level_gt_list = []
-            for i in range(len(change_points)):
-                left = change_points[i, 0]
-                right = change_points[i, 1]
-                n_frame = n_frame_per_seg[i]
-                gtscore_per_shot_list = []
-                while left % 15 != 0:
-                    left = left + 1
-                for j in range(left, right + 1, 15):
-                    k = j // 15
-                    gtscore_per_shot_list.append(gtscore[k])
-
-                if not gtscore_per_shot_list:
-                    gtscore_per_shot_list.append(0)
-
-                gtscore_per_shot = torch.Tensor(gtscore_per_shot_list)
-                gtscore_per_shot = torch.mean(gtscore_per_shot, dim=0)
-                video_level_gt_list.append(gtscore_per_shot)
-
-            video_level_gt_per_shot = torch.stack(video_level_gt_list, dim=0)
-            # video_level_gt_per_shot = torch.squeeze(video_level_gt_per_shot)
-            '''
+            
             self.list_frame_features.append(video_level_ft)
-            # self.list_frame_features_cap.append(frame_features_cap)
-            # self.list_gtscores.append(video_level_gt_per_shot)
-
         hdf.close()
         hdf_cap.close()
         hdf_gt.close()
