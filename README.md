@@ -10,7 +10,7 @@ where, N refers to the index of the used data split, E refers to the number of t
 
 To train and evaluate the model for all 5 splits, use the run_summe_splits.sh or run_tvsum_splits.sh script
 
-# Data
+## Data
 
 Structured h5 files with the video features and annotations of the SumMe and TVSum datasets are available within the data folder. The GoogleNet features of the video frames were extracted by Ke Zhang and Wei-Lun Chao and the h5 files were obtained from Kaiyang Zhou.
 
